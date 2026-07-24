@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class Cours extends StatefulWidget {
   const Cours({super.key});
@@ -24,6 +25,7 @@ class _CoursState extends State<Cours> {
   List<Map<String, dynamic>> _formateurModules = [];
   bool isLoading = true;
   bool isSaving = false;
+  bool _isExam = false; // Option pour basculer entre Leçon et Examen final
 
   @override
   void initState() {
@@ -36,17 +38,41 @@ class _CoursState extends State<Cours> {
     if (user == null) return;
 
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('modules')
-          .where('formateurs', arrayContains: user.uid)
+      // Récupération sécurisée via le document utilisateur et son tableau de modules
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
           .get();
 
+      if (!userDoc.exists) {
+        setState(() { isLoading = false; });
+        return;
+      }
+
+      var userData = userDoc.data() as Map<String, dynamic>;
+      List<dynamic> moduleIds = userData['modules'] ?? [];
+
+      if (moduleIds.isEmpty) {
+        setState(() { isLoading = false; });
+        return;
+      }
+
+      List<Map<String, dynamic>> loadedModules = [];
+      for (var id in moduleIds) {
+        DocumentSnapshot modDoc = await FirebaseFirestore.instance
+            .collection('modules')
+            .doc(id.toString().trim())
+            .get();
+
+        if (modDoc.exists) {
+          var modData = modDoc.data() as Map<String, dynamic>;
+          modData['id'] = modDoc.id;
+          loadedModules.add(modData);
+        }
+      }
+
       setState(() {
-        _formateurModules = querySnapshot.docs.map((doc) {
-          var data = doc.data() as Map<String, dynamic>;
-          data['id'] = doc.id;
-          return data;
-        }).toList();
+        _formateurModules = loadedModules;
         isLoading = false;
       });
     } catch (e) {
@@ -85,25 +111,34 @@ class _CoursState extends State<Cours> {
     });
   }
 
-  // Uploader les fichiers sur Firebase Storage et récupérer leurs URL
-  Future<List<String>> _uploadFilesToStorage() async {
-    List<String> downloadUrls = [];
-    User? user = FirebaseAuth.instance.currentUser;
+  // Envoi des fichiers vers le Google Drive via ton script Apps Script
+  Future<List<String>> _processFileLinks() async {
+    List<String> fileUrls = [];
 
     for (var file in _selectedFiles) {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString() + "_" + file.path.split('/').last;
-      Reference ref = FirebaseStorage.instance.ref().child('lessons_files/${user?.uid}/$fileName');
+      var request = http.MultipartRequest(
+        'POST', 
+        Uri.parse('https://script.google.com/macros/s/AKfycbxJXf-wOmXbOnK_YrEFGe_7cur6FXn-5OwMhFV3LCQZ2EirHm9JPI2KdiKEU9bSYFy-cg/exec')
+      );
       
-      UploadTask uploadTask = ref.putFile(file);
-      TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-      downloadUrls.add(downloadUrl);
+      request.files.add(await http.MultipartFile.fromPath('file', file.path));
+      
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        String downloadUrl = data['downloadUrl']; 
+        fileUrls.add(downloadUrl);
+      } else {
+        throw Exception("Erreur lors de l'envoi du fichier vers le Drive");
+      }
     }
 
-    return downloadUrls;
+    return fileUrls;
   }
 
-  Future<void> _publishLesson() async {
+  Future<void> _publishContent() async {
     if (!_formKey.currentState!.validate() || _selectedModuleId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez remplir les champs obligatoires et choisir un module.")),
@@ -113,7 +148,7 @@ class _CoursState extends State<Cours> {
 
     if (_selectedFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez ajouter au moins un fichier à la leçon.")),
+        const SnackBar(content: Text("Veuillez ajouter au moins un fichier.")),
       );
       return;
     }
@@ -125,34 +160,38 @@ class _CoursState extends State<Cours> {
     try {
       User? user = FirebaseAuth.instance.currentUser;
 
-      // 1. Upload des fichiers sur Firebase Storage
-      List<String> uploadedFileUrls = await _uploadFilesToStorage();
+      // 1. Upload des fichiers vers Google Drive et récupération des liens directs
+      List<String> fileUrls = await _processFileLinks();
 
-      // 2. Création du document de la leçon
-      DocumentReference lessonRef = await FirebaseFirestore.instance.collection('lessons').add({
+      // 2. Détermination de la collection cible selon s'il s'agit d'un examen ou d'une leçon
+      String targetCollection = _isExam ? 'exams' : 'lessons';
+      String targetArrayField = _isExam ? 'exams' : 'lessons';
+
+      // 3. Création du document dans Firestore
+      DocumentReference docRef = await FirebaseFirestore.instance.collection(targetCollection).add({
         'titre': _titreController.text.trim(),
         'description': _descriptionController.text.trim(),
-        'fichier': uploadedFileUrls, // Liste des URL stockées
+        'fichier': fileUrls, // Liste des URL Google Drive stockées
         'formateur_id': user?.uid,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // 3. Liaison de l'ID de la leçon au module choisi
+      // 4. Liaison de l'ID au module choisi
       await FirebaseFirestore.instance.collection('modules').doc(_selectedModuleId).update({
-        'lessons': FieldValue.arrayUnion([lessonRef.id]),
+        targetArrayField: FieldValue.arrayUnion([docRef.id]),
       });
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Leçon publiée avec succès !")),
+        SnackBar(content: Text(_isExam ? "Examen final publié avec succès !" : "Leçon publiée avec succès !")),
       );
 
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur lors de la publication.")),
+        SnackBar(content: Text("Erreur lors de la publication : $e")),
       );
     } finally {
       if (mounted) {
@@ -173,7 +212,7 @@ class _CoursState extends State<Cours> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Créer une leçon")),
+      appBar: AppBar(title: Text(_isExam ? "Publier un Examen Final" : "Créer une leçon")),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -202,9 +241,25 @@ class _CoursState extends State<Cours> {
                           ),
                     const SizedBox(height: 16),
 
+                    // --- SWITCH POUR BASCULER EN EXAMEN FINAL ---
+                    SwitchListTile(
+                      title: const Text("Est-ce un examen final ?"),
+                      subtitle: const Text("Active pour envoyer le sujet PDF de l'examen"),
+                      value: _isExam,
+                      activeColor: Colors.green,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _isExam = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 10),
+
                     TextFormField(
                       controller: _titreController,
-                      decoration: const InputDecoration(labelText: "Titre de la leçon"),
+                      decoration: InputDecoration(
+                        labelText: _isExam ? "Titre de l'examen" : "Titre de la leçon",
+                      ),
                       validator: (value) => value == null || value.isEmpty ? "Champ requis" : null,
                     ),
                     const SizedBox(height: 16),
@@ -212,7 +267,7 @@ class _CoursState extends State<Cours> {
                     TextFormField(
                       controller: _descriptionController,
                       maxLines: 4,
-                      decoration: const InputDecoration(labelText: "Description"),
+                      decoration: const InputDecoration(labelText: "Description / Consignes"),
                       validator: (value) => value == null || value.isEmpty ? "Champ requis" : null,
                     ),
                     const SizedBox(height: 20),
@@ -253,10 +308,14 @@ class _CoursState extends State<Cours> {
                     const SizedBox(height: 30),
 
                     ElevatedButton(
-                      onPressed: isSaving ? null : _publishLesson,
+                      style: ElevatedButton.styleFrom(backgroundColor: _isExam ? Colors.orange : Colors.green),
+                      onPressed: isSaving ? null : _publishContent,
                       child: isSaving
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text("Publier la leçon"),
+                          : Text(
+                              _isExam ? "Publier l'examen final" : "Publier la leçon",
+                              style: const TextStyle(color: Colors.white),
+                            ),
                     ),
                   ],
                 ),

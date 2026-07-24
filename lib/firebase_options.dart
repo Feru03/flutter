@@ -41,48 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAcCcsq7da2NXXYK9C0Qx8qLbw4PfrEJdw',
-    appId: '1:653387326860:web:296d786406fa89258562a9',
-    messagingSenderId: '653387326860',
-    projectId: 'applearning-80d7a',
-    authDomain: 'applearning-80d7a.firebaseapp.com',
-    storageBucket: 'applearning-80d7a.firebasestorage.app',
-    measurementId: 'G-GD6XXQVMNY',
+    apiKey: 'AIzaSyD9Qe00CkGwe164Ohcxvjm-DwMZUvzwxOw',
+    appId: '1:53164804901:web:184087912e4b2f60ad28cc',
+    messagingSenderId: '53164804901',
+    projectId: 'duolingo-942a0',
+    authDomain: 'duolingo-942a0.firebaseapp.com',
+    storageBucket: 'duolingo-942a0.firebasestorage.app',
+    measurementId: 'G-9CWLY1E6Z1',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDwEeIrZ3Jx0VYT4HgHmGGQhPgA1lvYLoA',
-    appId: '1:653387326860:android:b45e360d9b0936bc8562a9',
-    messagingSenderId: '653387326860',
-    projectId: 'applearning-80d7a',
-    storageBucket: 'applearning-80d7a.firebasestorage.app',
+    apiKey: 'AIzaSyC2323qWWir47n9D7DUvnxm9lWYT_w9x1E',
+    appId: '1:53164804901:android:7378e6474f0aa2ffad28cc',
+    messagingSenderId: '53164804901',
+    projectId: 'duolingo-942a0',
+    storageBucket: 'duolingo-942a0.firebasestorage.app',
   );
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBiIHUcVGLhQ_TE91iqV2DexUbibHKw7KI',
-    appId: '1:653387326860:ios:6ed04a15c8ff821d8562a9',
-    messagingSenderId: '653387326860',
-    projectId: 'applearning-80d7a',
-    storageBucket: 'applearning-80d7a.firebasestorage.app',
-    iosClientId: '653387326860-km6anfoc2i34mu5oqdo5oa5s9337te7b.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAYlArWpnqdvHmLupBwljgd22cCnomypSQ',
+    appId: '1:53164804901:ios:97d2d057742964b5ad28cc',
+    messagingSenderId: '53164804901',
+    projectId: 'duolingo-942a0',
+    storageBucket: 'duolingo-942a0.firebasestorage.app',
     iosBundleId: 'com.example.duolingo',
   );
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBiIHUcVGLhQ_TE91iqV2DexUbibHKw7KI',
-    appId: '1:653387326860:ios:6ed04a15c8ff821d8562a9',
-    messagingSenderId: '653387326860',
-    projectId: 'applearning-80d7a',
-    storageBucket: 'applearning-80d7a.firebasestorage.app',
-    iosClientId: '653387326860-km6anfoc2i34mu5oqdo5oa5s9337te7b.apps.googleusercontent.com',
+    apiKey: 'AIzaSyAYlArWpnqdvHmLupBwljgd22cCnomypSQ',
+    appId: '1:53164804901:ios:97d2d057742964b5ad28cc',
+    messagingSenderId: '53164804901',
+    projectId: 'duolingo-942a0',
+    storageBucket: 'duolingo-942a0.firebasestorage.app',
     iosBundleId: 'com.example.duolingo',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAcCcsq7da2NXXYK9C0Qx8qLbw4PfrEJdw',
-    appId: '1:653387326860:web:82523617e14e06348562a9',
-    messagingSenderId: '653387326860',
-    projectId: 'applearning-80d7a',
-    authDomain: 'applearning-80d7a.firebaseapp.com',
-    storageBucket: 'applearning-80d7a.firebasestorage.app',
-    measurementId: 'G-1TQT0626XZ',
+    apiKey: 'AIzaSyD9Qe00CkGwe164Ohcxvjm-DwMZUvzwxOw',
+    appId: '1:53164804901:web:d955ddc14b65b2d4ad28cc',
+    messagingSenderId: '53164804901',
+    projectId: 'duolingo-942a0',
+    authDomain: 'duolingo-942a0.firebaseapp.com',
+    storageBucket: 'duolingo-942a0.firebasestorage.app',
+    measurementId: 'G-875WZX3BR6',
   );
 }

@@ -20,7 +20,8 @@ class _ExosState extends State<Exos> {
     'quiz', 
     '4 images 1 mot', 
     'phrases à trou', 
-    'mot à relier'
+    'mot à relier',
+    'audio' // Nouveau type ajouté
   ];
 
   // Spécifique à "quiz"
@@ -49,6 +50,10 @@ class _ExosState extends State<Exos> {
       'droite': TextEditingController(),
     }
   ];
+
+  // Spécifique à "audio" (Prononciation)
+  final TextEditingController _audioUrlController = TextEditingController();
+  final TextEditingController _audioTexteReferenceController = TextEditingController();
 
   void _addQuizOption() {
     setState(() {
@@ -97,6 +102,8 @@ class _ExosState extends State<Exos> {
       p['gauche']!.dispose();
       p['droite']!.dispose();
     }
+    _audioUrlController.dispose();
+    _audioTexteReferenceController.dispose();
     super.dispose();
   }
 
@@ -105,7 +112,6 @@ class _ExosState extends State<Exos> {
       return;
     }
 
-    // Vérification logique minimale selon le type
     if (_selectedExerciseType == 'quiz') {
       bool hasCorrect = _quizOptions.any((opt) => opt['isCorrect'] == true);
       if (!hasCorrect) {
@@ -147,9 +153,12 @@ class _ExosState extends State<Exos> {
         };
       }).toList();
     }
+    else if (_selectedExerciseType == 'audio') {
+      exerciseData['audioUrl'] = _audioUrlController.text.trim();
+      exerciseData['texteReference'] = _audioTexteReferenceController.text.trim();
+    }
 
     try {
-      // Enregistrement effectif dans Firestore
       await FirebaseFirestore.instance.collection('exercises').add(exerciseData);
 
       if (!mounted) return;
@@ -177,7 +186,6 @@ class _ExosState extends State<Exos> {
           key: _formKey,
           child: ListView(
             children: [
-              // --- TITRE ET POINTS ---
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: "Titre de l'exercice"),
@@ -192,7 +200,6 @@ class _ExosState extends State<Exos> {
               ),
               const SizedBox(height: 20),
 
-              // --- SÉLECTION DU TYPE ---
               DropdownButtonFormField<String>(
                 value: _selectedExerciseType,
                 items: _exerciseTypes.map((type) {
@@ -210,9 +217,7 @@ class _ExosState extends State<Exos> {
               ),
               const SizedBox(height: 20),
 
-              // ==========================================
-              // --- BLOC 1 : QUIZ ---
-              // ==========================================
+              // ================= QUIZ =================
               if (_selectedExerciseType == 'quiz') ...[
                 const Text("Configuration du Quiz", style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
@@ -265,9 +270,7 @@ class _ExosState extends State<Exos> {
                 ),
               ],
 
-              // ==========================================
-              // --- BLOC 2 : 4 IMAGES 1 MOT ---
-              // ==========================================
+              // ================= 4 IMAGES 1 MOT =================
               if (_selectedExerciseType == '4 images 1 mot') ...[
                 const Text("Configuration 4 images 1 mot", style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
@@ -289,9 +292,7 @@ class _ExosState extends State<Exos> {
                 ),
               ],
 
-              // ==========================================
-              // --- BLOC 3 : PHRASES À TROU ---
-              // ==========================================
+              // ================= PHRASES À TROU =================
               if (_selectedExerciseType == 'phrases à trou') ...[
                 const Text("Configuration de la phrase à trou", style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
@@ -304,18 +305,9 @@ class _ExosState extends State<Exos> {
                   ),
                   validator: (value) => value == null || value.isEmpty ? "Champ requis" : null,
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    "Conseil : Mets les mots à trouver entre crochets [ex].",
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ),
               ],
 
-              // ==========================================
-              // --- BLOC 4 : MOT À RELIER ---
-              // ==========================================
+              // ================= MOT À RELIER =================
               if (_selectedExerciseType == 'mot à relier') ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -367,9 +359,30 @@ class _ExosState extends State<Exos> {
                 ),
               ],
 
+              // ================= AUDIO (PRONONCIATION) =================
+              if (_selectedExerciseType == 'audio') ...[
+                const Text("Configuration Exercice Audio", style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _audioUrlController,
+                  decoration: const InputDecoration(
+                    labelText: "URL du fichier Audio du professeur",
+                    hintText: "http://...",
+                  ),
+                  validator: (value) => value == null || value.isEmpty ? "Champ requis" : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _audioTexteReferenceController,
+                  decoration: const InputDecoration(
+                    labelText: "Texte de référence à répéter",
+                  ),
+                  validator: (value) => value == null || value.isEmpty ? "Champ requis" : null,
+                ),
+              ],
+
               const SizedBox(height: 30),
 
-              // --- BOUTON DE PUBLICATION ---
               ElevatedButton(
                 onPressed: _publishExercise,
                 style: ElevatedButton.styleFrom(

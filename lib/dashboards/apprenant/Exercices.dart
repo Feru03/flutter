@@ -4,6 +4,7 @@ import 'games/4images1mot.dart';
 import 'games/motArelier.dart';
 import 'games/phraseAtrou.dart';
 import 'games/quiz.dart';
+import 'games/audio.dart';
 
 class Exercices extends StatefulWidget {
   const Exercices({super.key});
@@ -23,12 +24,17 @@ class _ExercicesState extends State<Exercices> {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('exercises').snapshots(),
+            stream: FirebaseFirestore.instance
+                .collection('exercises')
+                .snapshots(),
             builder: (context, snapshot) {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Filtrer : ", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Filtrer : ",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(width: 10),
                   DropdownButton<String>(
                     value: _selectedModuleFilter,
@@ -54,16 +60,18 @@ class _ExercicesState extends State<Exercices> {
             stream: _selectedModuleFilter == null
                 ? FirebaseFirestore.instance.collection('exercises').snapshots()
                 : FirebaseFirestore.instance
-                    .collection('exercises')
-                    .where('module', isEqualTo: _selectedModuleFilter)
-                    .snapshots(),
+                      .collection('exercises')
+                      .where('module', isEqualTo: _selectedModuleFilter)
+                      .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return const Center(child: Text("Aucun exercice disponible pour le moment."));
+                return const Center(
+                  child: Text("Aucun exercice disponible pour le moment."),
+                );
               }
 
               final docs = snapshot.data!.docs;
@@ -77,13 +85,16 @@ class _ExercicesState extends State<Exercices> {
                   final int points = data['points'] ?? 10;
 
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: ListTile(
-                      leading: Icon(
-                        _getIconForType(type),
-                        color: Colors.green,
+                      leading: Icon(_getIconForType(type), color: Colors.green),
+                      title: Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text("Type : $type | Valeur : $points pts"),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
@@ -110,12 +121,18 @@ class _ExercicesState extends State<Exercices> {
         return Icons.edit;
       case 'mot à relier':
         return Icons.alt_route;
+      case 'audio':
+        return Icons.record_voice_over;
       default:
         return Icons.school;
     }
   }
 
-  void _navigateToExercise(BuildContext context, String type, Map<String, dynamic> exerciseData) {
+  void _navigateToExercise(
+    BuildContext context,
+    String type,
+    Map<String, dynamic> exerciseData,
+  ) {
     Widget targetPage;
 
     switch (type) {
@@ -130,6 +147,9 @@ class _ExercicesState extends State<Exercices> {
         break;
       case 'mot à relier':
         targetPage = MotARelierPage(exerciseData: exerciseData);
+        break;
+      case 'audio':
+        targetPage = Audio(exerciseData: exerciseData);
         break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(

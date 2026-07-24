@@ -28,6 +28,9 @@ class _ApprenantDashboardScreenState extends State<ApprenantDashboardScreen> {
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed, // Nécessaire pour 4 éléments ou plus
+        selectedItemColor: Colors.green, // Icône et texte actifs en vert
+        unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
