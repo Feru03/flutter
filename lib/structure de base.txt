@@ -1,0 +1,25 @@
+import 'package:flutter/material.dart';
+
+class nom_classe extends StatefulWidget {
+  const nom_classe({super.key});
+
+  @override
+  State<nom_classe> createState() => _nom_classeState();
+}
+
+class _nom_classeState extends State<nom_classe> {
+  // Ici tu mets tes variables et tes contrôleurs
+
+  @override
+  Widget build(BuildContext context) {
+    
+    // Ici tu mets le code de l'interface (Scaffold, Column, TextField, etc.)
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Connexion')),
+      body: const Center(
+        child: Text('Structure de base'),
+      ),
+    );
+  }
+}

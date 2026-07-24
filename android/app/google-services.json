@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "653387326860",
+    "project_id": "applearning-80d7a",
+    "storage_bucket": "applearning-80d7a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653387326860:android:b45e360d9b0936bc8562a9",
+        "android_client_info": {
+          "package_name": "com.example.duolingo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653387326860-r97e6ao48vbj2i2ai1unql6njm6u26e3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwEeIrZ3Jx0VYT4HgHmGGQhPgA1lvYLoA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653387326860-r97e6ao48vbj2i2ai1unql6njm6u26e3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "653387326860-km6anfoc2i34mu5oqdo5oa5s9337te7b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.duolingo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
