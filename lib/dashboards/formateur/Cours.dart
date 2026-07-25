@@ -88,7 +88,7 @@ class _CoursState extends State<Cours> {
 
   // Ouvrir l'explorateur de fichiers pour sélectionner un ou plusieurs documents
   Future<void> _pickFiles() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
       allowedExtensions: ['pdf', 'mp3', 'mp4'],

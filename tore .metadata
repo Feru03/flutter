@@ -1,0 +1,29 @@
+[1mdiff --git a/.metadata b/.metadata[m
+[1mindex 224ef08..10baf4d 100644[m
+[1m--- a/.metadata[m
+[1m+++ b/.metadata[m
+[36m@@ -15,24 +15,9 @@[m [mmigration:[m
+     - platform: root[m
+       create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+       base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-    - platform: android[m
+[31m-      create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-      base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-    - platform: ios[m
+[31m-      create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-      base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+     - platform: linux[m
+       create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+       base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-    - platform: macos[m
+[31m-      create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-      base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-    - platform: web[m
+[31m-      create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-      base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-    - platform: windows[m
+[31m-      create_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+[31m-      base_revision: ee80f08bbf97172ec030b8751ceab557177a34a6[m
+ [m
+   # User provided section[m
+ [m
